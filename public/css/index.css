@@ -1,0 +1,77 @@
+html,body{
+    width:100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+.container{
+    width:100%;
+    height: 100%;
+    box-sizing: border-box;
+    border:1px solid black;
+    margin: 0;
+    padding: 0;
+}
+.container .topMenu{
+    width:100%;
+    height: 10%;
+    box-sizing: border-box;
+    border: 1px solid orange;
+    display: flex;
+}
+.container .topMenu .tips{
+    width: 50%;
+    height: 100%;
+}
+.container .topMenu .operateContent{
+    width: 50%;
+    height: 100%;
+    box-sizing: border-box;
+    background-color: palegreen;
+}
+.container .bottom{
+    width:100%;
+    height: 90%;
+    box-sizing: border-box;
+    border: 1px solid red;
+    display: flex;
+}
+.container .bottom .leftContent{
+    width:20%;
+    height: 100%;
+    box-sizing: border-box;
+    border: 1px solid green;
+}
+.container .bottom .rightContent {
+    position: relative;
+    width: 80%;
+    height: 100%;
+    border: 1px solid red;
+}
+/* 远程视频容器 */
+.container .bottom .rightContent #remoteVideoContainer{
+    position: absolute;
+    height: 95%;
+    width: 100%;
+    bottom: 0;
+    /* background-color: palegoldenrod; */
+
+}
+.container .bottom .rightContent #remoteVideoContainer #remoteVideo{
+    width: 100%;
+    height: 100%;
+}
+/* 本地视频容器 */
+.container .bottom .rightContent #localVideoContainer{
+    position: absolute;
+    width: 30%;
+    height: 25%;
+    background-color: orange;
+    bottom: 10%;
+    right: 10%;
+    z-index: 1;
+}
+.container .bottom .rightContent #localVideoContainer #localVideo{
+    width: 100%;
+    height: 100%;
+}

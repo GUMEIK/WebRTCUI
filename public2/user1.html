@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+    <style>
+        video {
+            width: 300px;
+            height: 300px;
+            border: 1px solid black;
+        }
+    </style>
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+</head>
+
+<body>
+    <button id="btn1">用户一</button>
+    <button id="btn2">用户二</button>
+    <video id="localVideo" playsinline autoplay muted></video>
+    <video id="remoteVideo" playsinline autoplay></video>
+    <button id="call">call</button>
+    <button id="start">start</button>
+
+    <script>
+
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const callBtn = document.getElementById("call");
+        const startBtn = document.getElementById("start");
+        let { RTCPeerConnection, RTCSessionDescription } = window;
+
+        const socket = io.connect("localhost:5000");
+        btn1.onclick = () => {
+            socket.emit("userInfo", {
+                userName: "用户一",
+            })
+        }
+        btn2.onclick = () => {
+            socket.emit("userInfo", {
+                userName: "用户二",
+            })
+        }
+        let localStream;
+        let peerConnection = new RTCPeerConnection();
+        async function start() {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+            localVideo.srcObject = stream;
+            localStream = stream;
+        }
+        async function onIceCandidate(pc, event) {
+            const PC = getOtherPc(pc)
+            await PC.addIceCandidate(event.candidate);
+        }
+        async function callUser(socketId) {
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(new RTCSessionDescription(offer));
+            socket.emit("offerInfo", {
+                offer,
+                to: "用户二",
+                userName:"用户一"
+            });
+        }
+        socket.on("shareOffer", async (data) => {
+            await peerConnection.setRemoteDescription(
+                new RTCSessionDescription(data.offer)
+            );
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(new RTCSessionDescription(answer));
+            socket.emit("answerInfo", {
+                answer,
+                to: "用户二",
+                userName: "用户一"
+            })
+        })
+        socket.on("shareAnswer", async (data) => {
+            await peerConnection.setRemoteDescription(
+                new RTCSessionDescription(data.answer)
+            );
+        })
+        peerConnection.ontrack = function (e) {
+            const remoteVideo = document.getElementById("remoteVideo");
+            if (remoteVideo) {
+                remoteVideo.srcObject = e.streams[0];
+            }
+        };
+        navigator.getUserMedia(
+            { video: true, audio: true },
+            stream => {
+                const localVideo = document.getElementById("localVideo");
+                if (localVideo) {
+                    localVideo.srcObject = stream;
+                }
+                stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+            },
+            error => {
+                console.warn(error.message);
+            }
+        );
+        startBtn.onclick = () => {
+            start();
+        }
+
+        callBtn.onclick = () => {
+            callUser()
+        }
+    </script>
+</body>
+
+</html>
